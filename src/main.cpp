@@ -1,4 +1,3 @@
-#include <format>
 #include <iostream>
 
 #include "tree.hpp"
@@ -39,13 +38,7 @@ int main() {
           std::cout << "Invalid input!\n";
           return 1;
         }
-        // my_tree->print();
 
-        // if (!my_tree->is_balanced()) {
-        //   std::cout << "NOT BALANCED" << a;
-        //   my_tree->print();
-        //   return 0;
-        // }
         command = 0;
         break;
       case 'q':

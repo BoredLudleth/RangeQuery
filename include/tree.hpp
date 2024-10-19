@@ -3,7 +3,6 @@
 #include <math.h>
 
 #include <deque>
-#include <format>
 #include <functional>
 #include <iostream>
 
@@ -49,7 +48,7 @@ class tree {
   const bool RIGHT = true;
 
  public:
-  tree(KeyT key) { top = new node(key); }
+  tree(KeyT key) { top = new node<KeyT>(key); }
 
   node<KeyT>* insert(KeyT key) {
     node<KeyT>* cur_elem = top;
@@ -242,8 +241,7 @@ class tree {
       }
 
       if (cur_node != nullptr)
-        std::cout << std::format("{}({}) ", cur_node->get_key(),
-                                 cur_node->height);
+        std::cout << cur_node->get_key() << "(" << cur_node->height << ") ";
       else
         std::cout << "null ";
       all_nodes.pop_front();
