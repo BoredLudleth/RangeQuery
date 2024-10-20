@@ -36,6 +36,11 @@ int main() {
 
         if (!std::cin.good()) {
           std::cout << "Invalid input!\n";
+
+          if (my_tree != nullptr) {
+            delete my_tree;
+          }
+
           return 1;
         }
 
@@ -46,16 +51,28 @@ int main() {
 
         if (!std::cin.good()) {
           std::cout << "Invalid input!\n";
+
+          if (my_tree != nullptr) {
+            delete my_tree;
+          }
+
           return 1;
         }
-        std::cout << my_tree->distance(a, b) << std::endl;
+        if (my_tree != nullptr) {
+          std::cout << my_tree->distance(a, b) << " ";
+        } else {
+          std::cout << 0 << " ";
+        }
         command = 0;
         break;
 
       default:
-        delete my_tree;
+        if (my_tree != nullptr) {
+          delete my_tree;
+        }
 
 #ifndef NDEBUG
+        std::cout << std::endl;
         auto end = std::chrono::steady_clock::now();
         auto elapsed_ms =
             std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
