@@ -59,7 +59,7 @@ int main() {
           return 1;
         }
         if (my_tree != nullptr) {
-          std::cout << my_tree->distance(a, b) << " \n";
+          std::cout << my_tree->distance(a, b) << " ";
         } else {
           std::cout << 0 << " ";
         }

@@ -36,7 +36,7 @@ int main() {
           return 1;
         }
 
-        std::cout << range_query(thug, a, b) << " \n";
+        std::cout << range_query(thug, a, b) << " ";
         command = 0;
         break;
 
