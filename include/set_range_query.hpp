@@ -4,6 +4,13 @@
 #include <iterator>
 #include <set>
 
+#if defined(__has_include)
+#if __has_include(<format>)
+#include <format>
+#define FORMAT_SUPPORT
+#endif
+#endif
+
 namespace set_space {
 template <typename C, typename T>
 int range_query(const C& s, T fst, T snd) {
@@ -18,4 +25,4 @@ int range_query(const C& s, T fst, T snd) {
 
   return std::distance(start, fin);
 }
-}
+}  // namespace set_space

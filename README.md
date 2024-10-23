@@ -42,8 +42,8 @@ ctest
 
 На графиках представленных ниже это можно явно пронаблюдать.
 
-![alt text](images/compare.png)
+![alt text](images/two_graphics.png)
 
 График для нашего дерева практически совпадает с абсциссой, поэтому рассмотрим графики поотдельности.
 
-![alt text](images/two_graphics.png)
+![alt text](images/compare.png)

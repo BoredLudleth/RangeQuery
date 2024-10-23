@@ -6,6 +6,13 @@
 #include <functional>
 #include <iostream>
 
+#if defined(__has_include)
+#if __has_include(<format>)
+#include <format>
+#define FORMAT_SUPPORT
+#endif
+#endif
+
 namespace search_tree_space {
 template <typename KeyT = int>
 class node {
@@ -47,50 +54,6 @@ class tree {
   const bool LEFT = false;
   const bool RIGHT = true;
 
- public:
-  tree(KeyT key) { top = new node<KeyT>(key); }
-
-  node<KeyT>* insert(KeyT key) {
-    node<KeyT>* cur_elem = top;
-    node<KeyT>* parent = cur_elem;
-    bool inLeft = 0;
-
-    // no dublicates in the tree!
-    while (cur_elem != nullptr) {
-      parent = cur_elem;
-      if (cur_elem->get_key() < key) {
-        cur_elem = cur_elem->right;
-        inLeft = 0;
-      } else if (cur_elem->get_key() > key) {
-        cur_elem = cur_elem->left;
-        inLeft = 1;
-      } else {
-        return nullptr;
-      }
-    }
-    if (cur_elem == nullptr) {
-      if (inLeft) {
-        parent->left = new node<KeyT>(key);
-        parent->left->parent = parent;
-        change_height(parent->left);
-
-        change_size(parent->left);
-
-        return parent->left;
-      } else {
-        parent->right = new node<KeyT>(key);
-        parent->right->parent = parent;
-        change_height(parent->right);
-
-        change_size(parent->right);
-
-        return parent->right;
-      }
-    }
-
-    return nullptr;
-  }
-
   void change_size(node<KeyT>* node) {
     while (node != nullptr) {
       node->size = new_size(node);
@@ -104,9 +67,12 @@ class tree {
     if (new_node->right != nullptr) assign_height(new_node->right);
 
     assign_height(new_node);
+    while (new_node != nullptr) {
+      if (new_node->get_left_h() - new_node->get_right_h() ^ 2 > 1) {
+        new_node = balance(new_node);
+      }
 
-    if ((new_node->get_left_h() - new_node->get_right_h()) ^ 2 > 1) {
-      new_node = balance(new_node);
+      new_node = new_node->parent;
     }
   }
 
@@ -198,9 +164,12 @@ class tree {
     if (cur_node == nullptr) {
       return;
     }
-
-    cur_node->height =
-        std::max(cur_node->get_left_h(), cur_node->get_right_h()) + 1;
+    if (cur_node->left != nullptr || cur_node->right != nullptr) {
+      cur_node->height =
+          std::max(cur_node->get_left_h(), cur_node->get_right_h()) + 1;
+    } else {
+      cur_node->height = 0;
+    }
   }
 
   node<KeyT>* find(KeyT key) const {
@@ -226,28 +195,6 @@ class tree {
     }
 
     return nullptr;
-  }
-
-  void print() const {
-    std::deque<node<KeyT>*> all_nodes;
-    all_nodes.push_front(top);
-
-    for (int i = 0; !all_nodes.empty(); ++i) {
-      node<KeyT>* cur_node = all_nodes.front();
-
-      if (cur_node != nullptr) {
-        all_nodes.push_back(cur_node->left);
-        all_nodes.push_back(cur_node->right);
-      }
-
-      if (cur_node != nullptr)
-        std::cout << cur_node->get_key() << "(" << cur_node->height << ") ";
-      else
-        std::cout << "null ";
-      all_nodes.pop_front();
-    }
-
-    std::cout << std::endl;
   }
 
   int lr_count(node<KeyT>* cur_node, const int a, bool LR) const {
@@ -295,6 +242,84 @@ class tree {
     return result;
   }
 
+ public:
+  tree(KeyT key) { top = new node<KeyT>(key); }
+
+  node<KeyT>* get_top() { return top; }
+
+  node<KeyT>* insert(KeyT key) {
+    node<KeyT>* cur_elem = top;
+    node<KeyT>* parent = cur_elem;
+    bool inLeft = 0;
+
+    // no dublicates in the tree!
+    while (cur_elem != nullptr) {
+      parent = cur_elem;
+      if (cur_elem->get_key() < key) {
+        cur_elem = cur_elem->right;
+        inLeft = 0;
+      } else if (cur_elem->get_key() > key) {
+        cur_elem = cur_elem->left;
+        inLeft = 1;
+      } else {
+        return nullptr;
+      }
+    }
+
+    if (cur_elem == nullptr) {
+      if (inLeft) {
+        parent->left = new node<KeyT>(key);
+        parent->left->parent = parent;
+        change_size(parent->left);
+        change_size(parent);
+
+        assign_height(parent->left);
+        change_height(parent);
+
+        return parent->left;
+      } else {
+        parent->right = new node<KeyT>(key);
+        parent->right->parent = parent;
+        change_size(parent->right);
+        change_size(parent);
+
+        assign_height(parent->right);
+        change_height(parent);
+
+        return parent->right;
+      }
+    }
+
+    return nullptr;
+  }
+
+  void print() const {
+    std::deque<node<KeyT>*> all_nodes;
+    all_nodes.push_front(top);
+
+    for (int i = 0; !all_nodes.empty(); ++i) {
+      node<KeyT>* cur_node = all_nodes.front();
+
+      if (cur_node != nullptr) {
+        all_nodes.push_back(cur_node->left);
+        all_nodes.push_back(cur_node->right);
+      }
+
+      if (cur_node != nullptr)
+#ifdef FORMAT_SUPPORT
+        std::cout << std::format("{}({}) ", cur_node->get_key(),
+                                 cur_node->height);
+#else
+        std::cout << cur_node->get_key() << "(" << cur_node->height << ") ";
+#endif
+      else
+        std::cout << "null ";
+      all_nodes.pop_front();
+    }
+
+    std::cout << std::endl;
+  }
+
   int distance(KeyT a, KeyT b) {
     if (a > b) return 0;
 
@@ -322,33 +347,6 @@ class tree {
     result += lr_count(ptr_parent->right, b, RIGHT);
 
     return result + 1;
-  }
-
-  bool is_balanced() const {
-    std::deque<node<KeyT>*> all_nodes;
-    all_nodes.push_front(top);
-
-    while (!all_nodes.empty()) {
-      node<KeyT>* cur_node = all_nodes.front();
-
-      if ((cur_node->get_left_h() - cur_node->get_right_h()) *
-              (cur_node->get_left_h() - cur_node->get_right_h()) >
-          1) {
-        return false;
-      }
-
-      if (cur_node->left != nullptr) {
-        all_nodes.push_back(cur_node->left);
-      }
-
-      if (cur_node->right != nullptr) {
-        all_nodes.push_back(cur_node->right);
-      }
-
-      all_nodes.pop_front();
-    }
-
-    return true;
   }
 
   ~tree() {

@@ -59,7 +59,7 @@ int main() {
           return 1;
         }
         if (my_tree != nullptr) {
-          std::cout << my_tree->distance(a, b) << " ";
+          std::cout << my_tree->distance(a, b) << " \n";
         } else {
           std::cout << 0 << " ";
         }
@@ -72,12 +72,17 @@ int main() {
         }
 
 #ifndef NDEBUG
-        std::cout << std::endl;
+        std::cout << '\n';
         auto end = std::chrono::steady_clock::now();
         auto elapsed_ms =
             std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+#ifdef FORMAT_SUPPORT
+        std::cout << std::format("Time:{} s\n",
+                                 static_cast<float>(elapsed_ms.count()) / 1000);
+#else
         std::cout << "Time: " << static_cast<float>(elapsed_ms.count()) / 1000
                   << " s\n";
+#endif
 #endif
 
         return 0;
