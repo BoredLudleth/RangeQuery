@@ -71,8 +71,8 @@ int main() {
           delete my_tree;
         }
 
-#ifndef NDEBUG
         std::cout << '\n';
+#ifndef NDEBUG
         auto end = std::chrono::steady_clock::now();
         auto elapsed_ms =
             std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
