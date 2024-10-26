@@ -103,6 +103,7 @@ int main() {
       }
 
       default: {
+        my_tree.flush_tree();
         break;
       }
     }

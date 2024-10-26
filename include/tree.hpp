@@ -370,7 +370,7 @@ class tree {
     return result + 1;
   }
 
-  ~tree() {
+  void flush_tree() {
     std::deque<node<KeyT>*> all_nodes;
     all_nodes.push_front(top);
 

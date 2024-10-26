@@ -29,6 +29,8 @@ TEST(DistTest, TreeTest) {
   EXPECT_EQ(tr.distance(-10, 100), 10);
   EXPECT_EQ(tr.distance(1, 2), 2);
   EXPECT_EQ(tr.distance(11, 4), 0);
+
+  tr.flush_tree();
 }
 
 TEST(DistTest, SetTest) {
