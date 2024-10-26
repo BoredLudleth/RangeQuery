@@ -51,8 +51,6 @@ template <typename KeyT = int>
 class tree {
  private:
   node<KeyT>* top;
-  const bool LEFT = false;
-  const bool RIGHT = true;
 
   void change_size(node<KeyT>* node) {
     while (node != nullptr) {
@@ -172,7 +170,7 @@ class tree {
     }
   }
 
-  node<KeyT>* find(KeyT key) const {
+  node<KeyT>* find(const KeyT& key) const {
     node<KeyT>* cur_elem = find_father(key);
 
     if (cur_elem->left->get_key() == key) return cur_elem->left;
@@ -181,13 +179,14 @@ class tree {
     return nullptr;
   }
 
-  node<KeyT>* find_father(KeyT key) const {
+  template <typename Comparator = std::greater<KeyT>>
+  node<KeyT>* find_father(const KeyT& key, Comparator comp = Comparator{}) const {
     node<KeyT>* cur_elem = top;
 
     while (cur_elem != nullptr) {
-      if (cur_elem->get_key() < key) {
+      if (comp(key, cur_elem->get_key())) {
         cur_elem = cur_elem->right;
-      } else if (cur_elem->get_key() > key) {
+      } else if (comp(cur_elem->get_key(), key)) {
         cur_elem = cur_elem->left;
       } else {
         return cur_elem->parent;
@@ -197,7 +196,8 @@ class tree {
     return nullptr;
   }
 
-  int l_count(node<KeyT>* cur_node, const int a) const {
+  template <typename Comparator = std::greater<KeyT>>
+  int l_count(node<KeyT>* cur_node, const int a, Comparator comp = Comparator{}) const {
     if (cur_node == nullptr) {
       return 0;
     }
@@ -205,7 +205,7 @@ class tree {
     int result = 0;
 
     while (cur_node != nullptr) {
-      if (cur_node->get_key() > a) {
+      if (comp(cur_node->get_key(), a)) {
         ++result;
         if (cur_node->right != nullptr) result += cur_node->right->size;
 
@@ -213,7 +213,7 @@ class tree {
         continue;
       }
 
-      if (cur_node->get_key() < a) {
+      if (comp(a,cur_node->get_key())) {
         cur_node = cur_node->right;
         continue;
       }
@@ -229,7 +229,8 @@ class tree {
     return result;
   }
 
-  int r_count(node<KeyT>* cur_node, const int a) const {
+  template <typename Comparator = std::greater<KeyT>>
+  int r_count(node<KeyT>* cur_node, const int a, Comparator comp = Comparator{}) const {
     if (cur_node == nullptr) {
       return 0;
     }
@@ -237,12 +238,12 @@ class tree {
     int result = 0;
 
     while (cur_node != nullptr) {
-      if (cur_node->get_key() > a) {
+      if (comp(cur_node->get_key(), a)) {
         cur_node = cur_node->left;
         continue;
       }
 
-      if (cur_node->get_key() < a) {
+      if (comp(a, cur_node->get_key())) {
         ++result;
         if (cur_node->left != nullptr) result += cur_node->left->size;
 
@@ -262,7 +263,8 @@ class tree {
   }
 
  public:
-  node<KeyT>* insert(KeyT key) {
+  template <typename Comparator = std::greater<KeyT>>
+  node<KeyT>* insert(const KeyT& key, Comparator comp = Comparator{}) {
     if (top == nullptr) {
       top = new node<KeyT>(key);
 
@@ -275,10 +277,10 @@ class tree {
     // no dublicates in the tree!
     while (cur_elem != nullptr) {
       parent = cur_elem;
-      if (cur_elem->get_key() < key) {
+      if (comp(key, cur_elem->get_key())) {
         cur_elem = cur_elem->right;
         inLeft = 0;
-      } else if (cur_elem->get_key() > key) {
+      } else if (comp(cur_elem->get_key(), key)) {
         cur_elem = cur_elem->left;
         inLeft = 1;
       } else {
@@ -338,18 +340,19 @@ class tree {
     std::cout << std::endl;
   }
 
-  int distance(KeyT a, KeyT b) const {
-    if (a > b || top == nullptr) return 0;
+  template <typename Comparator = std::greater<KeyT>>
+  int distance(const KeyT& a, const KeyT& b, Comparator comp = Comparator{}) const {
+    if (comp(a, b) || top == nullptr) return 0;
 
     int result = 0;
 
     // find common subtree
     node<KeyT>* ptr_parent = top;
     do {
-      if (ptr_parent->get_key() > b) {
+      if (comp(ptr_parent->get_key(), b)) {
         ptr_parent = ptr_parent->left;
         continue;
-      } else if (ptr_parent->get_key() < a) {
+      } else if (comp(a, ptr_parent->get_key())) {
         ptr_parent = ptr_parent->right;
         continue;
       }
