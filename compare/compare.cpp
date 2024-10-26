@@ -52,38 +52,25 @@ int main() {
 
   auto begin = std::chrono::steady_clock::now();
 
-  tree<int>* my_tree = nullptr;
+  tree<int> my_tree{};
 
   for (auto it = data.begin(); it != data.end(); ++it) {
-    static bool is_allocated = 0;
     switch (*it) {
       case 'k': {
         ++it;
-        if (!is_allocated) {
-          my_tree = new tree<int>(*it);
-          is_allocated = 1;
-        } else {
-          my_tree->insert(*it);
-        }
+        my_tree.insert(*it);
 
         break;
       }
       case 'q': {
         ++it;
-        if (my_tree != nullptr) {
-          length = my_tree->distance(*it, *(std::next(it)));
-          ++it;
-        }
+        length = my_tree.distance(*it, *(std::next(it)));
+        ++it;
         break;
       }
 
-      default: {
-        if (my_tree != nullptr) {
-          delete my_tree;
-        }
-
+      default:
         break;
-      }
     }
   }
   auto end = std::chrono::steady_clock::now();

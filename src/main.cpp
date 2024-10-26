@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 #include "tree.hpp"
 
@@ -12,7 +13,7 @@ int main() {
   char command = 0;
   int first_key = 0;
 
-  tree<int>* my_tree = nullptr;
+  tree<int> my_tree{};
 
 #ifndef NDEBUG
   auto begin = std::chrono::steady_clock::now();
@@ -22,24 +23,14 @@ int main() {
   while (true) {
     std::cin >> command;
 
-    static bool is_allocated = 0;
     switch (command) {
       case 'k':
         std::cin >> a;
 
-        if (!is_allocated) {
-          my_tree = new tree<int>(a);
-          is_allocated = 1;
-        } else {
-          my_tree->insert(a);
-        }
+        my_tree.insert(a);
 
         if (!std::cin.good()) {
           std::cout << "Invalid input!\n";
-
-          if (my_tree != nullptr) {
-            delete my_tree;
-          }
 
           return 1;
         }
@@ -52,24 +43,15 @@ int main() {
         if (!std::cin.good()) {
           std::cout << "Invalid input!\n";
 
-          if (my_tree != nullptr) {
-            delete my_tree;
-          }
-
           return 1;
         }
-        if (my_tree != nullptr) {
-          std::cout << my_tree->distance(a, b) << " ";
-        } else {
-          std::cout << 0 << " ";
-        }
+        
+        std::cout << my_tree.distance(a, b) << " ";
+
         command = 0;
         break;
 
       default:
-        if (my_tree != nullptr) {
-          delete my_tree;
-        }
 
         std::cout << '\n';
 #ifndef NDEBUG

@@ -197,7 +197,7 @@ class tree {
     return nullptr;
   }
 
-  int lr_count(node<KeyT>* cur_node, const int a, bool LR) const {
+  int l_count(node<KeyT>* cur_node, const int a) const {
     if (cur_node == nullptr) {
       return 0;
     }
@@ -206,34 +206,53 @@ class tree {
 
     while (cur_node != nullptr) {
       if (cur_node->get_key() > a) {
-        if (LR == LEFT) {
-          ++result;
-          if (cur_node->right != nullptr) result += cur_node->right->size;
-        }
+        ++result;
+        if (cur_node->right != nullptr) result += cur_node->right->size;
 
         cur_node = cur_node->left;
         continue;
       }
 
       if (cur_node->get_key() < a) {
-        if (LR == RIGHT) {
-          ++result;
-          if (cur_node->left != nullptr) result += cur_node->left->size;
-        }
+        cur_node = cur_node->right;
+        continue;
+      }
+
+      if (cur_node->get_key() == a) {
+        ++result;
+        if (cur_node->right != nullptr) result += cur_node->right->size;
+      }
+
+      break;
+    }
+
+    return result;
+  }
+
+  int r_count(node<KeyT>* cur_node, const int a) const {
+    if (cur_node == nullptr) {
+      return 0;
+    }
+
+    int result = 0;
+
+    while (cur_node != nullptr) {
+      if (cur_node->get_key() > a) {
+        cur_node = cur_node->left;
+        continue;
+      }
+
+      if (cur_node->get_key() < a) {
+        ++result;
+        if (cur_node->left != nullptr) result += cur_node->left->size;
 
         cur_node = cur_node->right;
         continue;
       }
 
       if (cur_node->get_key() == a) {
-        if (LR == LEFT) {
-          ++result;
-          if (cur_node->right != nullptr) result += cur_node->right->size;
-        }
-        if (LR == RIGHT) {
-          ++result;
-          if (cur_node->left != nullptr) result += cur_node->left->size;
-        }
+        ++result;
+        if (cur_node->left != nullptr) result += cur_node->left->size;
       }
 
       break;
@@ -243,11 +262,12 @@ class tree {
   }
 
  public:
-  tree(KeyT key) { top = new node<KeyT>(key); }
-
-  node<KeyT>* get_top() { return top; }
-
   node<KeyT>* insert(KeyT key) {
+    if (top == nullptr) {
+      top = new node<KeyT>(key);
+
+      return top;
+    }
     node<KeyT>* cur_elem = top;
     node<KeyT>* parent = cur_elem;
     bool inLeft = 0;
@@ -266,28 +286,26 @@ class tree {
       }
     }
 
-    if (cur_elem == nullptr) {
-      if (inLeft) {
-        parent->left = new node<KeyT>(key);
-        parent->left->parent = parent;
-        change_size(parent->left);
-        change_size(parent);
+    if (inLeft) {
+      parent->left = new node<KeyT>(key);
+      parent->left->parent = parent;
+      change_size(parent->left);
+      change_size(parent);
 
-        assign_height(parent->left);
-        change_height(parent);
+      assign_height(parent->left);
+      change_height(parent);
 
-        return parent->left;
-      } else {
-        parent->right = new node<KeyT>(key);
-        parent->right->parent = parent;
-        change_size(parent->right);
-        change_size(parent);
+      return parent->left;
+    } else {
+      parent->right = new node<KeyT>(key);
+      parent->right->parent = parent;
+      change_size(parent->right);
+      change_size(parent);
 
-        assign_height(parent->right);
-        change_height(parent);
+      assign_height(parent->right);
+      change_height(parent);
 
-        return parent->right;
-      }
+      return parent->right;
     }
 
     return nullptr;
@@ -320,8 +338,8 @@ class tree {
     std::cout << std::endl;
   }
 
-  int distance(KeyT a, KeyT b) {
-    if (a > b) return 0;
+  int distance(KeyT a, KeyT b) const {
+    if (a > b || top == nullptr) return 0;
 
     int result = 0;
 
@@ -343,8 +361,8 @@ class tree {
       return 0;
     }
 
-    result += lr_count(ptr_parent->left, a, LEFT);
-    result += lr_count(ptr_parent->right, b, RIGHT);
+    result += l_count(ptr_parent->left, a);
+    result += r_count(ptr_parent->right, b);
 
     return result + 1;
   }

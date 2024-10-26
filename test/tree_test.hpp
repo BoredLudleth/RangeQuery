@@ -5,32 +5,10 @@
 #include "tree.hpp"
 
 namespace search_tree_space {
-TEST(InsertTest, TreeTest) {
-  tree<int> tr{1};
-
-  EXPECT_EQ(tr.get_top()->get_key(), 1);
-
-  tr.insert(2);
-
-  EXPECT_EQ(tr.get_top()->get_key(), 1);
-  EXPECT_EQ(tr.get_top()->right->get_key(), 2);
-
-  tr.insert(3);
-
-  EXPECT_EQ(tr.get_top()->get_key(), 2);
-  EXPECT_EQ(tr.get_top()->left->get_key(), 1);
-  EXPECT_EQ(tr.get_top()->right->get_key(), 3);
-
-  tr.insert(4);
-
-  EXPECT_EQ(tr.get_top()->get_key(), 3);
-  EXPECT_EQ(tr.get_top()->left->get_key(), 2);
-  EXPECT_EQ(tr.get_top()->right->get_key(), 4);
-  EXPECT_EQ(tr.get_top()->left->left->get_key(), 1);
-}
 
 TEST(DistTest, TreeTest) {
-  tree<int> tr(1);
+  tree<int> tr{};
+  tr.insert(1);
   tr.insert(2);
   tr.insert(3);
   tr.insert(4);
