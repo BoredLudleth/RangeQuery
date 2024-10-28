@@ -47,7 +47,7 @@ class node {
   }
 };
 
-template <typename KeyT = int>
+template <typename KeyT = int, class Comparator = std::greater<KeyT>>
 class tree {
  private:
   node<KeyT>* top;
@@ -179,8 +179,7 @@ class tree {
     return nullptr;
   }
 
-  template <typename Comparator = std::greater<KeyT>>
-  node<KeyT>* find_father(const KeyT& key, Comparator comp = Comparator{}) const {
+  node<KeyT>* find_father(const KeyT& key, Comparator comp) const {
     node<KeyT>* cur_elem = top;
 
     while (cur_elem != nullptr) {
@@ -196,7 +195,6 @@ class tree {
     return nullptr;
   }
 
-  template <typename Comparator = std::greater<KeyT>>
   int l_count(node<KeyT>* cur_node, const int a, Comparator comp = Comparator{}) const {
     if (cur_node == nullptr) {
       return 0;
@@ -229,7 +227,6 @@ class tree {
     return result;
   }
 
-  template <typename Comparator = std::greater<KeyT>>
   int r_count(node<KeyT>* cur_node, const int a, Comparator comp = Comparator{}) const {
     if (cur_node == nullptr) {
       return 0;
@@ -263,12 +260,11 @@ class tree {
   }
 
  public:
-  template <typename Comparator = std::greater<KeyT>>
-  node<KeyT>* insert(const KeyT& key, Comparator comp = Comparator{}) {
+  bool insert(const KeyT& key, Comparator comp = Comparator{}) {
     if (top == nullptr) {
       top = new node<KeyT>(key);
 
-      return top;
+      return true;
     }
     node<KeyT>* cur_elem = top;
     node<KeyT>* parent = cur_elem;
@@ -284,7 +280,7 @@ class tree {
         cur_elem = cur_elem->left;
         inLeft = 1;
       } else {
-        return nullptr;
+        return false;
       }
     }
 
@@ -297,7 +293,7 @@ class tree {
       assign_height(parent->left);
       change_height(parent);
 
-      return parent->left;
+      return true;
     } else {
       parent->right = new node<KeyT>(key);
       parent->right->parent = parent;
@@ -307,10 +303,10 @@ class tree {
       assign_height(parent->right);
       change_height(parent);
 
-      return parent->right;
+      return true;
     }
 
-    return nullptr;
+    return false;
   }
 
   void print() const {
@@ -340,7 +336,6 @@ class tree {
     std::cout << std::endl;
   }
 
-  template <typename Comparator = std::greater<KeyT>>
   int distance(const KeyT& a, const KeyT& b, Comparator comp = Comparator{}) const {
     if (comp(a, b) || top == nullptr) return 0;
 
@@ -370,7 +365,7 @@ class tree {
     return result + 1;
   }
 
-  void flush_tree() {
+  ~tree() {
     std::deque<node<KeyT>*> all_nodes;
     all_nodes.push_front(top);
 

@@ -51,8 +51,6 @@ int main() {
         break;
 
       default:
-        my_tree.flush_tree();
-        
         std::cout << '\n';
 #ifndef NDEBUG
         auto end = std::chrono::steady_clock::now();
