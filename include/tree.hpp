@@ -45,6 +45,11 @@ class node {
 
     return right->height;
   }
+  
+  ~node() {
+    delete right;
+    delete left;
+  }
 };
 
 template <typename KeyT = int, class Comparator = std::greater<KeyT>>
@@ -366,23 +371,7 @@ class tree {
   }
 
   ~tree() {
-    std::deque<node<KeyT>*> all_nodes;
-    all_nodes.push_front(top);
-
-    while (!all_nodes.empty()) {
-      node<KeyT>* cur_del_node = all_nodes.front();
-
-      if (cur_del_node->left != nullptr) {
-        all_nodes.push_back(cur_del_node->left);
-      }
-
-      if (cur_del_node->right != nullptr) {
-        all_nodes.push_back(cur_del_node->right);
-      }
-
-      delete cur_del_node;
-      all_nodes.pop_front();
-    }
+    delete top;
   }
 };
 }  // namespace search_tree_space
