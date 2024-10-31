@@ -5,6 +5,7 @@
 #include <deque>
 #include <functional>
 #include <iostream>
+#include <memory>
 
 #if defined(__has_include)
 #if __has_include(<format>)
@@ -20,9 +21,9 @@ class node {
   KeyT key;
 
  public:
-  node* parent = nullptr;
-  node* left = nullptr;
-  node* right = nullptr;
+  std::weak_ptr<node> parent;
+  std::shared_ptr<node> left = nullptr;
+  std::shared_ptr<node> right = nullptr;
   size_t size = 0;
 
   int height = 0;
@@ -45,26 +46,21 @@ class node {
 
     return right->height;
   }
-  
-  ~node() {
-    delete right;
-    delete left;
-  }
 };
 
 template <typename KeyT = int, class Comparator = std::greater<KeyT>>
 class tree {
  private:
-  node<KeyT>* top;
+  std::shared_ptr<node<KeyT>> top;
 
-  void change_size(node<KeyT>* node) {
+  void change_size(std::shared_ptr<node<KeyT>> node) {
     while (node != nullptr) {
       node->size = new_size(node);
-      node = node->parent;
+      node = node->parent.lock();
     }
   }
 
-  void change_height(node<KeyT>* new_node) {
+  void change_height(std::shared_ptr<node<KeyT>> new_node) {
     if (new_node->left != nullptr) assign_height(new_node->left);
 
     if (new_node->right != nullptr) assign_height(new_node->right);
@@ -75,11 +71,11 @@ class tree {
         new_node = balance(new_node);
       }
 
-      new_node = new_node->parent;
+      new_node = new_node->parent.lock();
     }
   }
 
-  size_t new_size(node<KeyT>* node) const {
+  size_t new_size(std::shared_ptr<node<KeyT>> node) const {
     if (node == nullptr) return 0;
 
     size_t result = 1;
@@ -91,16 +87,16 @@ class tree {
     return result;
   }
 
-  node<KeyT>* balance(node<KeyT>* cur_node) {
+  std::shared_ptr<node<KeyT>> balance(std::shared_ptr<node<KeyT>> cur_node) {
     if (cur_node->get_left_h() > cur_node->get_right_h()) {
-      node<KeyT>* left_tmp = cur_node->left;
-      node<KeyT>* subtree = left_tmp->right;
+      std::shared_ptr<node<KeyT>> left_tmp = cur_node->left;
+      std::shared_ptr<node<KeyT>> subtree = left_tmp->right;
 
-      if (cur_node->parent != nullptr) {
-        if (cur_node->parent->left == cur_node) {
-          cur_node->parent->left = left_tmp;
+      if (cur_node->parent.lock() != nullptr) {
+        if (cur_node->parent.lock()->left == cur_node) {
+          cur_node->parent.lock()->left = left_tmp;
         } else {
-          cur_node->parent->right = left_tmp;
+          cur_node->parent.lock()->right = left_tmp;
         }
       } else {
         top = left_tmp;
@@ -127,14 +123,14 @@ class tree {
     }
 
     if (cur_node->get_left_h() < cur_node->get_right_h()) {
-      node<KeyT>* right_tmp = cur_node->right;
-      node<KeyT>* subtree = right_tmp->left;
+      std::shared_ptr<node<KeyT>> right_tmp = cur_node->right;
+      std::shared_ptr<node<KeyT>> subtree = right_tmp->left;
 
-      if (cur_node->parent != nullptr) {
-        if (cur_node->parent->left == cur_node) {
-          cur_node->parent->left = right_tmp;
+      if (cur_node->parent.lock() != nullptr) {
+        if (cur_node->parent.lock()->left == cur_node) {
+          cur_node->parent.lock()->left = right_tmp;
         } else {
-          cur_node->parent->right = right_tmp;
+          cur_node->parent.lock()->right = right_tmp;
         }
       } else {
         top = right_tmp;
@@ -163,7 +159,7 @@ class tree {
     return cur_node;
   }
 
-  void assign_height(node<KeyT>* cur_node) {
+  void assign_height(std::shared_ptr<node<KeyT>> cur_node) {
     if (cur_node == nullptr) {
       return;
     }
@@ -175,8 +171,8 @@ class tree {
     }
   }
 
-  node<KeyT>* find(const KeyT& key) const {
-    node<KeyT>* cur_elem = find_father(key);
+  std::shared_ptr<node<KeyT>> find(const KeyT& key) const {
+    std::shared_ptr<node<KeyT>> cur_elem = find_father(key);
 
     if (cur_elem->left->get_key() == key) return cur_elem->left;
 
@@ -184,8 +180,8 @@ class tree {
     return nullptr;
   }
 
-  node<KeyT>* find_father(const KeyT& key, Comparator comp) const {
-    node<KeyT>* cur_elem = top;
+  std::shared_ptr<node<KeyT>> find_father(const KeyT& key, const Comparator& comp = Comparator{}) const {
+    std::shared_ptr<node<KeyT>> cur_elem = top;
 
     while (cur_elem != nullptr) {
       if (comp(key, cur_elem->get_key())) {
@@ -200,7 +196,7 @@ class tree {
     return nullptr;
   }
 
-  int l_count(node<KeyT>* cur_node, const int a, Comparator comp = Comparator{}) const {
+  int l_count(std::shared_ptr<node<KeyT>> cur_node, const int a, const Comparator& comp = Comparator{}) const {
     if (cur_node == nullptr) {
       return 0;
     }
@@ -232,7 +228,7 @@ class tree {
     return result;
   }
 
-  int r_count(node<KeyT>* cur_node, const int a, Comparator comp = Comparator{}) const {
+  int r_count(std::shared_ptr<node<KeyT>> cur_node, const int a, const Comparator& comp = Comparator{}) const {
     if (cur_node == nullptr) {
       return 0;
     }
@@ -265,14 +261,14 @@ class tree {
   }
 
  public:
-  bool insert(const KeyT& key, Comparator comp = Comparator{}) {
+  bool insert(const KeyT& key, const Comparator& comp = Comparator{}) {
     if (top == nullptr) {
-      top = new node<KeyT>(key);
+      top = std::make_shared<node<KeyT>>(key);
 
       return true;
     }
-    node<KeyT>* cur_elem = top;
-    node<KeyT>* parent = cur_elem;
+    std::shared_ptr<node<KeyT>> cur_elem = top;
+    std::shared_ptr<node<KeyT>> parent = cur_elem;
     bool inLeft = 0;
 
     // no dublicates in the tree!
@@ -290,7 +286,7 @@ class tree {
     }
 
     if (inLeft) {
-      parent->left = new node<KeyT>(key);
+      parent->left = std::make_shared<node<KeyT>>(key);
       parent->left->parent = parent;
       change_size(parent->left);
       change_size(parent);
@@ -300,7 +296,7 @@ class tree {
 
       return true;
     } else {
-      parent->right = new node<KeyT>(key);
+      parent->right = std::make_shared<node<KeyT>>(key);
       parent->right->parent = parent;
       change_size(parent->right);
       change_size(parent);
@@ -315,11 +311,11 @@ class tree {
   }
 
   void print() const {
-    std::deque<node<KeyT>*> all_nodes;
+    std::deque<std::shared_ptr<node<KeyT>>> all_nodes;
     all_nodes.push_front(top);
 
     for (int i = 0; !all_nodes.empty(); ++i) {
-      node<KeyT>* cur_node = all_nodes.front();
+      std::shared_ptr<node<KeyT>> cur_node = all_nodes.front();
 
       if (cur_node != nullptr) {
         all_nodes.push_back(cur_node->left);
@@ -341,13 +337,13 @@ class tree {
     std::cout << std::endl;
   }
 
-  int distance(const KeyT& a, const KeyT& b, Comparator comp = Comparator{}) const {
+  int distance(const KeyT& a, const KeyT& b, const Comparator& comp = Comparator{}) const {
     if (comp(a, b) || top == nullptr) return 0;
 
     int result = 0;
 
     // find common subtree
-    node<KeyT>* ptr_parent = top;
+    std::shared_ptr<node<KeyT>> ptr_parent = top;
     do {
       if (comp(ptr_parent->get_key(), b)) {
         ptr_parent = ptr_parent->left;
@@ -368,10 +364,6 @@ class tree {
     result += r_count(ptr_parent->right, b);
 
     return result + 1;
-  }
-
-  ~tree() {
-    delete top;
   }
 };
 }  // namespace search_tree_space
