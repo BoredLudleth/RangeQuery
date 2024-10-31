@@ -11,7 +11,7 @@
 #endif
 #endif
 
-namespace set_space {
+namespace common_space {
 template <typename C, typename T>
 int range_query(const C& s, T fst, T snd) {
   if (fst > snd) {
@@ -25,4 +25,4 @@ int range_query(const C& s, T fst, T snd) {
 
   return std::distance(start, fin);
 }
-}  // namespace set_space
+}  // namespace common_space

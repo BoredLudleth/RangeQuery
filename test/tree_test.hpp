@@ -1,7 +1,7 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "set_range_query.hpp"
+#include "range_query.hpp"
 #include "tree.hpp"
 
 namespace search_tree_space {
@@ -32,7 +32,7 @@ TEST(DistTest, TreeTest) {
 }
 
 TEST(DistTest, SetTest) {
-  using set_space::range_query;
+  using common_space::range_query;
   std::set<int> s;
   s.insert(1);
   s.insert(2);

@@ -1,11 +1,11 @@
-#include "set_range_query.hpp"
+#include "range_query.hpp"
 
 #ifndef NDEBUG
 #include <chrono>
 #endif
 
 int main() {
-  using namespace set_space;
+  using namespace common_space;
   std::set<int> thug;
   char command = 0;
 

@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "tree.hpp"
+#include "range_query.hpp"
 
 #ifndef NDEBUG
 #include <chrono>
@@ -8,6 +9,7 @@
 
 int main() {
   using namespace search_tree_space;
+  using namespace common_space;
 
   char command = 0;
   int first_key = 0;

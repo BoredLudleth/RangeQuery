@@ -1,12 +1,12 @@
 #include <chrono>
 #include <vector>
 
-#include "set_range_query.hpp"
+#include "range_query.hpp"
 #include "tree.hpp"
 
 int main() {
   using namespace search_tree_space;
-  using namespace set_space;
+  using namespace common_space;
 
   std::vector<int> data;
   int a = 0, b = 0;
