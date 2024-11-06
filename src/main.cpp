@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "tree.hpp"
 #include "range_query.hpp"
+#include "tree.hpp"
 
 #ifndef NDEBUG
 #include <chrono>
@@ -47,6 +47,7 @@ int main() {
           return 1;
         }
         std::cout << my_tree.distance(a, b) << " ";
+        // second way to count distance
         // std::cout << range_query(my_tree, a, b) << " ";
 
         command = 0;

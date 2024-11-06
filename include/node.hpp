@@ -1,11 +1,11 @@
 #pragma once
 
-namespace search_tree_space
-{
+namespace search_tree_space {
 template <typename KeyT = int>
 class node {
  private:
   KeyT key;
+
  public:
   std::weak_ptr<node> parent;
   std::shared_ptr<node> left = nullptr;
@@ -33,4 +33,4 @@ class node {
     return right->height;
   }
 };
-};
+};  // namespace search_tree_space

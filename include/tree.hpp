@@ -235,10 +235,13 @@ class tree {
 
  public:
   class iterator : public std::iterator<std::bidirectional_iterator_tag, node<KeyT>>{
-    public:
+    private:
+      Comparator comp;
       std::shared_ptr<node<KeyT>> ptr;
+    
+    public:
 
-      iterator(std::shared_ptr<node<KeyT>> node_ptr) : ptr(node_ptr) {}
+      iterator(std::shared_ptr<node<KeyT>> node_ptr, Comparator comp = Comparator{}) : ptr(node_ptr), comp(comp) {}
 
         node<KeyT>& operator*() const {
           return *ptr;
@@ -275,7 +278,7 @@ class tree {
           
           do {
             ptr = ptr->parent.lock();
-          } while (ptr->get_key() < tmp->get_key());
+          } while (comp(tmp->get_key(), ptr->get_key()));
 
           return *this;
         }
@@ -308,7 +311,7 @@ class tree {
           
           do {
             ptr = ptr->parent.lock();
-          } while (ptr->get_key() > tmp->get_key());
+          } while (comp(ptr->get_key(), tmp->get_key()));
 
           return *this;
         }
@@ -319,22 +322,21 @@ class tree {
 
           return tmp;
         }
-
-        iterator& to_lowest() & {
-          while (ptr->left != nullptr) {
-            ptr = ptr->left;
-          }
-
-          return *this;
+      iterator& to_lowest() & {
+        while (ptr->left != nullptr) {
+          ptr = ptr->left;
         }
 
-        iterator& to_highest() {
-          while(ptr->right != nullptr) {
-            ptr = ptr->right;
-          }
+        return *this;
+      }
 
-          return *this;
+      iterator& to_highest() {
+        while(ptr->right != nullptr) {
+          ptr = ptr->right;
         }
+
+        return *this;
+      }
     };
 
   iterator begin() const {
@@ -350,20 +352,20 @@ class tree {
     return finish;
   }
 
-  iterator lower_bound(KeyT key) const {
+  iterator lower_bound(KeyT key, const Comparator& comp = Comparator{}) const {
     std::shared_ptr<node<KeyT>> current_ptr = top;
     std::shared_ptr<node<KeyT>> result_ptr = top->parent.lock();
 
     while(current_ptr != nullptr) {
-      if (current_ptr->get_key() >= key) {
-        if (current_ptr->get_key() < result_ptr->get_key())
+      if (!comp(key, current_ptr->get_key())) {
+        if (comp(result_ptr->get_key(), current_ptr->get_key()))
           result_ptr = current_ptr;
 
         current_ptr = current_ptr->left;
         continue;
       }
 
-      if (current_ptr->get_key() < key) {
+      if (comp(key, current_ptr->get_key())) {
         current_ptr = current_ptr->right;
         continue;
       }
