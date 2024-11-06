@@ -6,7 +6,9 @@
 
 namespace search_tree_space {
 
-TEST(DistTest, TreeTest) {
+TEST(DistTestRangeQuery, TreeTest) {
+  using common_space::range_query;
+  
   tree<int> tr{};
   tr.insert(1);
   tr.insert(2);
@@ -19,16 +21,34 @@ TEST(DistTest, TreeTest) {
   tr.insert(14);
   tr.insert(18);
 
-  EXPECT_EQ(tr.distance(5, 8), 0);
-  EXPECT_EQ(tr.distance(5, 5), 0);
-  EXPECT_EQ(tr.distance(1, 1), 1);
-  EXPECT_EQ(tr.distance(3, 12), 5);
-  EXPECT_EQ(tr.distance(1, 4), 4);
-  EXPECT_EQ(tr.distance(3, 100), 8);
-  EXPECT_EQ(tr.distance(-10, 11), 6);
-  EXPECT_EQ(tr.distance(-10, 100), 10);
-  EXPECT_EQ(tr.distance(1, 2), 2);
-  EXPECT_EQ(tr.distance(11, 4), 0);
+  EXPECT_EQ(range_query(tr, 5, 8), 0);
+  EXPECT_EQ(range_query(tr, 5, 5), 0);
+  EXPECT_EQ(range_query(tr, 1, 1), 1);
+  EXPECT_EQ(range_query(tr, 3, 12), 5);
+  EXPECT_EQ(range_query(tr, 1, 4), 4);
+  EXPECT_EQ(range_query(tr, 3, 100), 8);
+  EXPECT_EQ(range_query(tr, -10, 11), 6);
+  EXPECT_EQ(range_query(tr, -10, 100), 10);
+  EXPECT_EQ(range_query(tr, 1, 2), 2);
+  EXPECT_EQ(range_query(tr, 11, 4), 0);
+}
+
+TEST(IterTest, TreeTest) {
+  tree<int> tr{};
+
+  for (int i = 1; i < 15; ++i) {
+    tr.insert(i);
+  }
+
+  int i = 1;
+  tree<int>::iterator it = tr.begin();
+  for (it = tr.begin(); it != tr.end(); ++it) {
+    EXPECT_EQ(it->get_key(), i);
+    ++i;
+  }
+
+  EXPECT_EQ(it, tr.end());
+
 }
 
 TEST(DistTest, SetTest) {

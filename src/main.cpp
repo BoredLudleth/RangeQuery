@@ -46,8 +46,8 @@ int main() {
 
           return 1;
         }
-        
         std::cout << my_tree.distance(a, b) << " ";
+        // std::cout << range_query(my_tree, a, b) << " ";
 
         command = 0;
         break;

@@ -1,12 +1,10 @@
 #pragma once
 
-#include <math.h>
-
 #include <deque>
 #include <functional>
 #include <iostream>
 #include <memory>
-// #include <iterator>
+#include <iterator>
 
 #if defined(__has_include)
 #if __has_include(<format>)
@@ -15,47 +13,17 @@
 #endif
 #endif
 
+#include "node.hpp"
+
 namespace search_tree_space {
-template <typename KeyT = int>
-class node {
- private:
-  KeyT key;
-
- public:
-  std::weak_ptr<node> parent;
-  std::shared_ptr<node> left = nullptr;
-  std::shared_ptr<node> right = nullptr;
-  size_t size = 0;
-
-  int height = 0;
-  node(const KeyT& key = 0) : key(key) {}
-
-  KeyT get_key() const { return key; }
-
-  bool is_right_null() const { return right == nullptr; }
-
-  bool is_left_null() const { return left == nullptr; }
-
-  int get_left_h() const {
-    if (left == nullptr) return 0;
-
-    return left->height;
-  }
-
-  int get_right_h() const {
-    if (right == nullptr) return 0;
-
-    return right->height;
-  }
-};
-
 template <typename KeyT = int, class Comparator = std::greater<KeyT>>
 class tree {
  private:
   std::shared_ptr<node<KeyT>> top;
+  std::shared_ptr<node<KeyT>> end_node;
 
   void change_size(std::shared_ptr<node<KeyT>> node) {
-    while (node != nullptr) {
+    while (node != end_node) {
       node->size = new_size(node);
       node = node->parent.lock();
     }
@@ -67,7 +35,7 @@ class tree {
     if (new_node->right != nullptr) assign_height(new_node->right);
 
     assign_height(new_node);
-    while (new_node != nullptr) {
+    while (new_node != end_node) {
       if (new_node->get_left_h() - new_node->get_right_h() ^ 2 > 1) {
         new_node = balance(new_node);
       }
@@ -93,14 +61,16 @@ class tree {
       std::shared_ptr<node<KeyT>> left_tmp = cur_node->left;
       std::shared_ptr<node<KeyT>> subtree = left_tmp->right;
 
-      if (cur_node->parent.lock() != nullptr) {
+      if (cur_node->parent.lock() != end_node) {
         if (cur_node->parent.lock()->left == cur_node) {
           cur_node->parent.lock()->left = left_tmp;
         } else {
           cur_node->parent.lock()->right = left_tmp;
         }
       } else {
+        left_tmp->parent = top->parent;
         top = left_tmp;
+        top->parent.lock()->right = top;
       }
       left_tmp->parent = cur_node->parent;
 
@@ -127,14 +97,16 @@ class tree {
       std::shared_ptr<node<KeyT>> right_tmp = cur_node->right;
       std::shared_ptr<node<KeyT>> subtree = right_tmp->left;
 
-      if (cur_node->parent.lock() != nullptr) {
+      if (cur_node->parent.lock() != end_node) {
         if (cur_node->parent.lock()->left == cur_node) {
           cur_node->parent.lock()->left = right_tmp;
         } else {
           cur_node->parent.lock()->right = right_tmp;
         }
       } else {
+        right_tmp->parent = top->parent;
         top = right_tmp;
+        top->parent.lock()->right = top;
       }
       right_tmp->parent = cur_node->parent;
 
@@ -190,7 +162,7 @@ class tree {
       } else if (comp(cur_elem->get_key(), key)) {
         cur_elem = cur_elem->left;
       } else {
-        return cur_elem->parent;
+        return cur_elem->parent.lock();
       }
     }
 
@@ -262,9 +234,159 @@ class tree {
   }
 
  public:
+  class iterator : public std::iterator<std::bidirectional_iterator_tag, node<KeyT>>{
+    public:
+      std::shared_ptr<node<KeyT>> ptr;
+
+      iterator(std::shared_ptr<node<KeyT>> node_ptr) : ptr(node_ptr) {}
+
+        node<KeyT>& operator*() const {
+          return *ptr;
+        };
+
+        std::shared_ptr<node<KeyT>> operator->() const {
+          return ptr;
+        }
+
+        bool operator==(const iterator &other) const {
+          if (ptr == other.ptr) {
+            return true;
+          }
+
+          return false;
+        }
+
+        bool operator!=(const iterator &other) const {
+          return !(operator==(other));
+        }
+
+        iterator& operator++() {
+          if (ptr == nullptr) {
+            return *this;
+          }
+
+          if (ptr->right != nullptr){
+            ptr = ptr->right;
+
+            return to_lowest();
+          }
+
+          std::shared_ptr<node<KeyT>> tmp = ptr;
+          
+          do {
+            ptr = ptr->parent.lock();
+          } while (ptr->get_key() < tmp->get_key());
+
+          return *this;
+        }
+
+        iterator operator++(int) {
+          iterator tmp = *this;
+          operator++();
+
+          return tmp;
+        }
+
+        iterator& operator--() {
+          if (ptr == nullptr) {
+            return *this;
+          }
+
+          if (ptr->left != nullptr){
+            ptr = ptr->left;
+
+            return to_highest();
+          }
+
+          if (ptr->parent.lock() == nullptr) {
+            ptr = ptr->right;
+
+            return to_highest();
+          }
+
+          std::shared_ptr<node<KeyT>> tmp = ptr;
+          
+          do {
+            ptr = ptr->parent.lock();
+          } while (ptr->get_key() > tmp->get_key());
+
+          return *this;
+        }
+
+        iterator operator--(int) {
+          iterator tmp = *this;
+          --this;
+
+          return tmp;
+        }
+
+        iterator& to_lowest() & {
+          while (ptr->left != nullptr) {
+            ptr = ptr->left;
+          }
+
+          return *this;
+        }
+
+        iterator& to_highest() {
+          while(ptr->right != nullptr) {
+            ptr = ptr->right;
+          }
+
+          return *this;
+        }
+    };
+
+  iterator begin() const {
+    iterator start(top);
+    start.to_lowest();
+
+    return start;
+  }
+
+  iterator end() const {
+    iterator finish(top->parent.lock());
+    
+    return finish;
+  }
+
+  iterator lower_bound(KeyT key) const {
+    std::shared_ptr<node<KeyT>> current_ptr = top;
+    std::shared_ptr<node<KeyT>> result_ptr = top->parent.lock();
+
+    while(current_ptr != nullptr) {
+      if (current_ptr->get_key() >= key) {
+        if (current_ptr->get_key() < result_ptr->get_key())
+          result_ptr = current_ptr;
+
+        current_ptr = current_ptr->left;
+        continue;
+      }
+
+      if (current_ptr->get_key() < key) {
+        current_ptr = current_ptr->right;
+        continue;
+      }
+    }
+
+    iterator result(result_ptr);
+    return result;
+  }
+
+  iterator upper_bound(KeyT key) const {
+    iterator result = lower_bound(key);
+    if (result->get_key() == key) {
+      result++;
+    }
+    return result;
+  }
+
   bool insert(const KeyT& key, const Comparator& comp = Comparator{}) {
     if (top == nullptr) {
       top = std::make_shared<node<KeyT>>(key);
+      end_node = std::make_shared<node<KeyT>>(INT_MAX);
+      top->parent = end_node;
+      end_node->right = top;
 
       return true;
     }
@@ -285,10 +407,10 @@ class tree {
         return false;
       }
     }
-
     if (inLeft) {
       parent->left = std::make_shared<node<KeyT>>(key);
       parent->left->parent = parent;
+
       change_size(parent->left);
       change_size(parent);
 
@@ -299,6 +421,7 @@ class tree {
     } else {
       parent->right = std::make_shared<node<KeyT>>(key);
       parent->right->parent = parent;
+
       change_size(parent->right);
       change_size(parent);
 

@@ -13,7 +13,7 @@
 
 namespace common_space {
 template <typename C, typename T>
-int range_query(const C& s, T fst, T snd) {
+int range_query(C& s, T fst, T snd) {
   if (fst > snd) {
     return 0;
   }
