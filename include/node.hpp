@@ -7,10 +7,11 @@ class node {
   KeyT key;
 
  public:
-  std::weak_ptr<node> parent;
-  std::shared_ptr<node> left = nullptr;
-  std::shared_ptr<node> right = nullptr;
-  size_t size = 0;
+  node* parent = nullptr;
+  node* left   = nullptr;
+  node* right  = nullptr;
+
+  int size = 1;
 
   int height = 0;
   node(const KeyT& key = 0) : key(key) {}
@@ -31,6 +32,20 @@ class node {
     if (right == nullptr) return 0;
 
     return right->height;
+  }
+
+  int get_size() const {
+    return size;
+  }
+
+  void update_size() {
+    size = 1;
+
+    if (left != nullptr)
+      size += left->get_size();
+
+    if (right != nullptr)
+      size += right->get_size();
   }
 };
 };  // namespace search_tree_space

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "range_query.hpp"
+#include "range_query_tree.hpp"
 #include "tree.hpp"
 
 #ifndef NDEBUG
@@ -9,7 +9,6 @@
 
 int main() {
   using namespace search_tree_space;
-  using namespace common_space;
 
   char command = 0;
   int first_key = 0;
@@ -46,9 +45,8 @@ int main() {
 
           return 1;
         }
-        std::cout << my_tree.distance(a, b) << " ";
-        // second way to count distance
-        // std::cout << range_query(my_tree, a, b) << " ";
+
+        std::cout << range_query(my_tree, a, b) << " ";
 
         command = 0;
         break;

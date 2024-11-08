@@ -1,6 +1,7 @@
 #include <chrono>
 #include <vector>
 
+#include "range_query_tree.hpp"
 #include "range_query.hpp"
 #include "tree.hpp"
 
@@ -64,7 +65,7 @@ int main() {
       }
       case 'q': {
         ++it;
-        length = my_tree.distance(*it, *(std::next(it)));
+        length = search_tree_space::range_query(my_tree, *it, *(std::next(it)));
         ++it;
         break;
       }
