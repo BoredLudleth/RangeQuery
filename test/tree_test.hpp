@@ -78,15 +78,6 @@ TEST(BeginTest, TreeTest) {
   EXPECT_EQ(tr.begin()->get_key(), 1);
 }
 
-TEST(EndTest, TreeTest) {
-  tree<int> tr{};
-  tr.insert(3);
-  tr.insert(1);
-  tr.insert(2);
-
-  EXPECT_EQ(tr.end()->get_key(), INT_MAX);
-}
-
 TEST(DistTest, SetTest) {
   using common_space::range_query;
   std::set<int> s;

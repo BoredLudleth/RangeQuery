@@ -82,7 +82,6 @@ class tree {
       if (cur_node == top) {
         top = left_tmp;
         top->parent = &(data.front());
-        // data.begin()->right = top;
       }
 
       if (subtree != nullptr) {
@@ -118,7 +117,6 @@ class tree {
       if (cur_node == top) {
         top = right_tmp;
         top->parent = &(data.front());
-        // data.begin()->right = top;
       }
 
       if (subtree != nullptr) {
@@ -146,7 +144,7 @@ class tree {
 
       top = &data.back();
       top->parent = &(data.front());
-      data.begin()->right = top;
+      top->parent->right = top;
 
       return true;
     }
@@ -197,7 +195,7 @@ class tree {
     return false;
   }
 
-  class iterator : public std::iterator_traits<node_t> {
+  class iterator {
    private:
     Comparator comp;
     const node_t* ptr;

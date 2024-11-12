@@ -27,16 +27,4 @@ int range_query(tree<KeyT>& s, KeyT fst, KeyT snd) {
 
   return s.distance(start, fin);
 }
-
-template <typename KeyT> 
-int my_distance(typename tree<KeyT>::iterator start, typename tree<KeyT>::iterator fin) {
-  int result = 0;
-
-  while (start != fin) {
-    ++start;
-    ++result;
-  }
-
-  return result;
-}
 }  // namespace search_tree_space
