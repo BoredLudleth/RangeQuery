@@ -21,7 +21,7 @@ class tree {
  private:
   using node_t = node<KeyT>;
   using data_it = std::list<node_t>::iterator;
-  
+
   node_t* top = nullptr;
   std::list<node_t> data;
 
@@ -426,7 +426,7 @@ class tree {
 #ifdef FORMAT_SUPPORT
       std::cout << std::format("{} {} ", it->get_key(), it->get_size());
 #else
-      std::cout << cur_node->get_key() << " ";
+      std::cout << it->get_key() << " ";
 #endif
     }
 
