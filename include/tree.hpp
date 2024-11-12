@@ -19,9 +19,9 @@ namespace search_tree_space {
 template <typename KeyT = int, class Comparator = std::greater<KeyT>>
 class tree {
  private:
-  typedef node<KeyT> node_t;
-  typedef std::list<node_t>::iterator data_it;
-
+  using node_t = node<KeyT>;
+  using data_it = std::list<node_t>::iterator;
+  
   node_t* top = nullptr;
   std::list<node_t> data;
 
