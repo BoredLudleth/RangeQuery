@@ -204,7 +204,7 @@ class tree {
     iterator(const node_t* node_ptr, Comparator comp = Comparator{})
         : ptr(node_ptr), comp(comp) {}
 
-    const node_t& operator*() const { return *ptr; };
+    const KeyT& operator*() const { return ptr->get_key(); };
 
     const node_t* operator->() const { return ptr; }
 
@@ -347,8 +347,8 @@ class tree {
       return 0;
     }
 
-    const node_t* low = &*start;
-    const node_t* high = &*fin;
+    const node_t* low = start.operator->();
+    const node_t* high = fin.operator->();
 
     node_t* cur_node = top;
 
@@ -381,7 +381,7 @@ class tree {
         continue;
       }
 
-      if (const_cast<const node_t*>(cur_node) == low) {
+      if (cur_node == low) {
         ++result;
         if (cur_node->right != nullptr) result += cur_node->right->size;
       }
@@ -409,7 +409,7 @@ class tree {
         continue;
       }
 
-      if (const_cast<const node_t*>(cur_node) == high) {
+      if (cur_node == high) {
         if (cur_node->left != nullptr) result += cur_node->left->size;
       }
 
