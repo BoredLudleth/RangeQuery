@@ -22,6 +22,7 @@ class tree {
   using node_t = node<KeyT>;
   using data_it = std::list<node_t>::iterator;
 
+  node_t* canary = nullptr;
   node_t* top = nullptr;
   std::list<node_t> data;
 
@@ -46,7 +47,7 @@ class tree {
 
     assign_height(cur_node);
 
-    while (cur_node != top->parent) {
+    while (cur_node != canary) {
       if ((cur_node->get_left_h() - cur_node->get_right_h()) ^ 2 > 1)
         cur_node = balance(cur_node);
 
@@ -81,7 +82,7 @@ class tree {
 
       if (cur_node == top) {
         top = left_tmp;
-        top->parent = &(data.front());
+        top->parent = canary;
       }
 
       if (subtree != nullptr) {
@@ -116,7 +117,7 @@ class tree {
 
       if (cur_node == top) {
         top = right_tmp;
-        top->parent = &(data.front());
+        top->parent = canary;
       }
 
       if (subtree != nullptr) {
@@ -142,9 +143,11 @@ class tree {
       data.push_back(INT_MAX);
       data.push_back(key);
 
+      canary = &(data.front());
+
       top = &data.back();
-      top->parent = &(data.front());
-      top->parent->right = top;
+      top->parent = canary;
+      canary->right = top;
 
       return true;
     }
@@ -235,7 +238,7 @@ class tree {
 
       do {
         ptr = ptr->parent;
-      } while (comp(tmp->get_key(), ptr->get_key()));
+      } while (comp(tmp->get_key(), ptr->get_key()) && ptr->parent != nullptr);
 
       return *this;
     }
@@ -304,13 +307,13 @@ class tree {
   }
 
   iterator end() const {
-    iterator finish(top->parent);
+    iterator finish(canary);
     return finish;
   }
 
   iterator lower_bound(KeyT key, const Comparator& comp = Comparator{}) const {
     node_t* current_ptr = top;
-    node_t* result_ptr = top->parent;
+    node_t* result_ptr = canary;
 
     while (current_ptr != nullptr) {
       if (!comp(key, current_ptr->get_key())) {

@@ -14,6 +14,7 @@ class node {
   int size = 1;
 
   int height = 0;
+  
   node(const KeyT& key = 0) : key(key) {}
 
   KeyT get_key() const { return key; }
